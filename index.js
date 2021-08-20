@@ -12,10 +12,28 @@ for (const file of commandFiles) {
 	client.commands.set(command.name, command);
 }
 
-client.once('ready', () => {
-	console.log('Ready!');
+
+//-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------//
+client.on("ready", () => {
+  console.log(`Logged in as ${client.user.tag}!`);
+  client.user.setActivity(`<status>`, { type: "LISTENING" });
 });
 
+
+//-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------//
+const eventFiles = fs.readdirSync('./events').filter(file => file.endsWith('.js'));
+
+for (const file of eventFiles) {
+	const event = require(`./events/${file}`);
+	if (event.once) {
+		client.once(event.name, (...args) => event.execute(...args, client));
+	} else {
+		client.on(event.name, (...args) => event.execute(...args, client));
+	}
+}
+
+
+//-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------//
 client.on('message', message => {
 	if (!message.content.startsWith(prefix) || message.author.bot) return;
 
@@ -33,4 +51,6 @@ client.on('message', message => {
 	}
 });
 
+
+//-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------//
 client.login(token);
